@@ -3,6 +3,7 @@ import { getRepository, Repository } from 'typeorm';
 import IOrdersRepository from '@modules/orders/repositories/IOrdersRepository';
 import ICreateOrderDTO from '@modules/orders/dtos/ICreateOrderDTO';
 import Order from '../entities/Order';
+import AppError from '@shared/errors/AppError';
 
 class OrdersRepository implements IOrdersRepository {
   private ormRepository: Repository<Order>;
@@ -11,12 +12,23 @@ class OrdersRepository implements IOrdersRepository {
     this.ormRepository = getRepository(Order);
   }
 
-  public async create({ customer, products }: ICreateOrderDTO): Promise<void> {
-    //const order = this.ormRepository.create({customer, products})
+  public async create({ customer, products }: ICreateOrderDTO): Promise<Order> {
+    const order = this.ormRepository.create({
+      customer,
+      order_products: products,
+    });
+
+    await this.ormRepository.save(order);
+
+    return order;
   }
 
-  public async findById(id: string): Promise<void> {
-    // TODO
+  public async findById(id: string): Promise<Order | undefined> {
+    const findOrder = await this.ormRepository.findOne(id, {
+      relations: ['order_products', 'customer'],
+    });
+
+    return findOrder;
   }
 }
 

@@ -28,7 +28,7 @@ class CreateOrderService {
     private customersRepository: ICustomersRepository,
   ) {}
 
-  public async execute({ customer_id, products }: IRequest): Promise<void> {
+  public async execute({ customer_id, products }: IRequest): Promise<Order> {
 
     const customer = await this.customersRepository.findById(customer_id);
 
@@ -36,21 +36,40 @@ class CreateOrderService {
 
     const findProducts = await this.productsRepository.findAllById(products);
 
-    if(!findProducts.length) throw new AppError('Could not find any products with this ID');
+    if(!findProducts.length) throw new AppError('Could not find any products with giver IDs');
+    // se ele mandar o ID errado.
 
-    const existentProductsId = findProducts.map(product => product.id);
+    const findProductsIds = findProducts.map(p => p.id);
 
-    const checkInexistentProducts = products.filter(product => !existentProductsId.includes(product.id));
-    
-    const serializedProducts = products.map(product => ({
-      product_id: '843848484848',
-      quantity: 1,
-      price: 20,
-    }));
+    const checkInexistentProducts = products.filter(p => !findProductsIds.includes(p.id));
+
+    if(checkInexistentProducts.length) throw new AppError('Could not find product');
+
+    const findProductsWithNoQuantityAvailable = products.filter(product => 
+      findProducts.filter(p => p.id === product.id)[0].quantity < product.quantity,
+    );
+
+    if(findProductsWithNoQuantityAvailable.length) throw new AppError('Quantity is not available');
+
+
+    const serializedProducts = products.map(product => {
+      return {
+        product_id: product.id,
+        quantity: product.quantity,
+        price: findProducts.filter(p => p.id === product.id)[0].price,
+      }
+    });
 
     const order = await this.ordersRepository.create({ customer, products: serializedProducts });
 
-    //return order;
+    const orderProductsQuantity = products.map(product => ({
+      id: product.id,
+      quantity: findProducts.filter(p => p.id === product.id)[0].quantity - product.quantity,
+    }));
+
+    await this.productsRepository.updateQuantity(orderProductsQuantity);
+
+    return order;
   }
 }
 

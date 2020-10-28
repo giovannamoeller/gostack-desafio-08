@@ -26,7 +26,7 @@ export class CreateProducts1603850122652 implements MigrationInterface {
                 },
                 {
                     name: "quantity",
-                    type: "bigint",
+                    type: "int",
                 },
                 {
                     name: "created_at",

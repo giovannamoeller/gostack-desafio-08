@@ -4,7 +4,7 @@ export class CreateOrdersProducts1603850202108 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.createTable(new Table({
-            name: 'orders_products',
+            name: 'order_products',
             columns: [
                 {
                     name: "id",
@@ -29,7 +29,7 @@ export class CreateOrdersProducts1603850202108 implements MigrationInterface {
                 },
                 {
                     name: "quantity",
-                    type: "bigint",
+                    type: "int",
                 },
                 {
                     name: "created_at",
@@ -44,7 +44,7 @@ export class CreateOrdersProducts1603850202108 implements MigrationInterface {
             ],
         }));
 
-        await queryRunner.createForeignKey('orders_products', new TableForeignKey({
+        await queryRunner.createForeignKey('order_products', new TableForeignKey({
             name: 'OrderId',
             columnNames: ['order_id'],
             referencedColumnNames: ['id'],
@@ -53,7 +53,7 @@ export class CreateOrdersProducts1603850202108 implements MigrationInterface {
             onUpdate: 'CASCADE'
         }));
 
-        await queryRunner.createForeignKey('orders_products', new TableForeignKey({
+        await queryRunner.createForeignKey('order_products', new TableForeignKey({
             name: 'ProductId',
             columnNames: ['product_id'],
             referencedColumnNames: ['id'],
@@ -64,9 +64,9 @@ export class CreateOrdersProducts1603850202108 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<any> {
-        await queryRunner.dropTable('orders_products');
-        await queryRunner.dropForeignKey('orders_products', 'OrderId');
-        await queryRunner.dropForeignKey('orders_products', 'ProductId');
+        await queryRunner.dropTable('order_products');
+        await queryRunner.dropForeignKey('order_products', 'OrderId');
+        await queryRunner.dropForeignKey('order_products', 'ProductId');
     }
 
 }
